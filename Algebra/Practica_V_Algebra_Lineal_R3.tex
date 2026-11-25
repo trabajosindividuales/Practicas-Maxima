@@ -1,0 +1,140 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage{amsmath,amssymb,geometry,fancyhdr,xcolor,listings,tikz,array}
+\geometry{margin=2.4cm,headheight=16pt}
+\pagestyle{fancy}\fancyhf{}\lhead{UPCT}\rhead{GITS}\lfoot{Prácticas de wxMaxima}\rfoot{\thepage}
+\definecolor{azul}{RGB}{23,65,105}
+\lstset{basicstyle=\ttfamily\small,backgroundcolor=\color{black!4},frame=single,rulecolor=\color{black!15},breaklines=true,columns=fullflexible}
+
+\begin{document}
+\begin{center}{\large Práctica de laboratorio V}\\[5pt]{\LARGE\bfseries\color{azul} Álgebra lineal: espacios vectoriales}\end{center}
+\noindent Nombre y apellidos: \hrulefill\par\medskip
+\noindent\textbf{Objetivos.} Trabajar exclusivamente con ejemplos y ejercicios de vectores de $\mathbb R^3$, bases, coordenadas y subespacios mediante aritmética exacta. Justificar cada resultado con los criterios matemáticos correspondientes. Ejecutar las celdas con Mayús+Intro.
+\section{Comandos de Maxima para álgebra lineal}
+Maxima incorpora operaciones matriciales y el paquete adicional \texttt{linearalgebra}. Los vectores se introducen como matrices de una columna. En los cálculos exactos no se necesitan aproximaciones decimales.
+\begin{lstlisting}
+kill(all)$
+load("linearalgebra")$
+A:matrix([1,0,1],[0,1,1],[1,1,2])$
+rank(A); echelon(A); triangularize(A);
+columnspace(A); nullspace(A); nullity(A);
+matrix_size(A); linalg_rank(A);
+row(A,1); col(A,2);
+rowop(A,3,1,1); rowswap(A,1,2);
+columnop(A,3,1,1); columnswap(A,1,2);
+addcol(A,matrix([0],[0],[1]));
+addrow(A,[1,0,0]);
+E:[x+y=2,x-y=0,z-x=1]$
+coefmatrix(E,[x,y,z]); augcoefmatrix(E,[x,y,z]);
+linsolve(E,[x,y,z]);
+ident(3); invert(matrix([1,2,0],[1,3,0],[1,0,1]));
+\end{lstlisting}
+\noindent Los comandos \texttt{columnspace} y \texttt{nullspace} devuelven una expresión \texttt{span} cuyos argumentos son vectores de una base; \texttt{span()} representa el subespacio nulo. El rango de la matriz da la dimensión del subespacio generado por sus columnas. Los comandos \texttt{rowop(A,i,j,k)} y \texttt{columnop(A,i,j,k)} restan a la fila o columna $i$ la fila o columna $j$ multiplicada por $k$.
+\section{Independencia, dependencia y sistemas generadores}
+Sea $V=\mathbb R^n$. Una familia $(v_1,\ldots,v_k)$ es linealmente independiente (LI) si $\sum_i c_i v_i=0$ implica $c_1=\cdots=c_k=0$; en otro caso es dependiente (LD). El subespacio generado por los vectores de la familia es el conjunto de todas sus combinaciones lineales. La familia es un sistema generador de $V$ si este subespacio coincide con $V$.
+
+Escribimos los vectores como columnas de $A=[v_1\ \cdots\ v_k]$. Entonces
+\[\boxed{\text{LI}\iff\operatorname{rg}A=k,\qquad \text{genera }\mathbb R^n\iff\operatorname{rg}A=n.}\]
+Una base es una familia LI y generadora; en $\mathbb R^n$ consta exactamente de $n$ vectores. El rango mide la dimensión del subespacio generado por los vectores. No basta contar vectores para decidir si son LI.
+
+\textbf{Ejemplo guiado.} Considerar $v_1=\begin{pmatrix}1\\0\\1\end{pmatrix}$, $v_2=\begin{pmatrix}0\\1\\1\end{pmatrix}$, $v_3=\begin{pmatrix}1\\1\\2\end{pmatrix}$. Obtener una relación de dependencia y una base del subespacio generado por los tres vectores. Comparar con la familia que añade $e_3$.
+\begin{lstlisting}
+kill(all)$
+A:matrix([1,0,1],[0,1,1],[1,1,2])$
+rank(A); echelon(A);
+load("linearalgebra")$
+columnspace(A); nullspace(A);
+A.matrix([1],[1],[-1]);
+B:matrix([1,0],[0,1],[1,1])$
+rank(B);
+C:matrix([1,0,0],[0,1,0],[1,1,1])$
+rank(C);
+\end{lstlisting}
+\section{Bases y coordenadas}
+Dada una base ordenada $\mathcal B=(b_1,\ldots,b_n)$, las coordenadas de $u$ son los únicos escalares tales que $u=\sum_i c_i b_i$. Si $P_{\mathcal B}=[b_1\ \cdots\ b_n]$, entonces
+\[\boxed{u=P_{\mathcal B}[u]_{\mathcal B}.}\]
+Resolver el sistema es preferible a calcular explícitamente la inversa en problemas numéricos. Aquí se trabaja con aritmética exacta.
+
+\textbf{Ejemplo.} En $\mathbb R^3$, tomar $\mathcal B=(\begin{pmatrix}1\\1\\1\end{pmatrix},\begin{pmatrix}2\\3\\0\end{pmatrix},\begin{pmatrix}0\\0\\1\end{pmatrix})$ y $u=\begin{pmatrix}1\\-3\\2\end{pmatrix}$. Calcular y reconstruir sus coordenadas.
+\begin{lstlisting}
+PB:matrix([1,2,0],[1,3,0],[1,0,1])$
+u:matrix([1],[-3],[2])$
+rank(PB);
+c:invert(PB).u;
+PB.c;
+\end{lstlisting}
+\section{Cambio de base}
+Para dos bases ordenadas $\mathcal B,\mathcal C$ del mismo espacio, definimos $M_{\mathcal C\leftarrow\mathcal B}$ como la matriz que transforma coordenadas en $\mathcal B$ en coordenadas en $\mathcal C$:
+\[\boxed{[u]_{\mathcal C}=M_{\mathcal C\leftarrow\mathcal B}[u]_{\mathcal B},\quad M_{\mathcal C\leftarrow\mathcal B}=P_{\mathcal C}^{-1}P_{\mathcal B}.}\]
+Sus columnas son $[b_i]_{\mathcal C}$. La matriz del cambio inverso es $M_{\mathcal B\leftarrow\mathcal C}=M_{\mathcal C\leftarrow\mathcal B}^{-1}$. Para una tercera base $\mathcal D$, la composición es $M_{\mathcal D\leftarrow\mathcal C}M_{\mathcal C\leftarrow\mathcal B}$.
+
+\textbf{Ejemplo.} Conservar $\mathcal B$ y $u$ del ejemplo anterior y tomar $\mathcal C=(\begin{pmatrix}1\\0\\0\end{pmatrix},\begin{pmatrix}1\\1\\1\end{pmatrix},\begin{pmatrix}0\\0\\1\end{pmatrix})$.
+\begin{lstlisting}
+PC:matrix([1,1,0],[0,1,0],[0,1,1])$
+M:invert(PC).PB;
+N:invert(PB).PC;
+M.N; N.M;
+d:M.c;
+PC.d;
+\end{lstlisting}
+\section{Subespacios: ecuaciones paramétricas e implícitas}
+Un subconjunto no vacío $W\subseteq\mathbb R^n$ es subespacio si $\alpha u+\beta v\in W$ para cualesquiera $u,v\in W$ y escalares $\alpha,\beta$. En particular contiene el origen. Las soluciones de un sistema lineal homogéneo forman un subespacio; un sistema no homogéneo compatible con término independiente no nulo no lo es.
+
+Una descripción paramétrica es $X=Bt$, donde las columnas de $B$ pueden elegirse como una base de $W$. Una descripción implícita es $AX=0$. Si $B$ tiene columnas independientes y $A$ describe exactamente $W$,
+\[\boxed{\dim W=\operatorname{rg}B=n-\operatorname{rg}A.}\]
+Para pasar de paramétricas a implícitas se eliminan los parámetros, o se resuelve el sistema que expresa que la fila de coeficientes $a$ satisface $aB=0$ y se toman los vectores solución de una base como filas de $A$. Para pasar de implícitas a paramétricas se resuelve el sistema homogéneo y se extraen los coeficientes de los parámetros libres.
+
+\textbf{Ejemplo.} $W=\langle\begin{pmatrix}1\\0\\1\end{pmatrix},\begin{pmatrix}0\\1\\1\end{pmatrix}\rangle$. Obtener $z=x+y$ y recuperar los generadores. En Maxima, \texttt{linsolve} puede introducir parámetros libres con nombres automáticos.
+\begin{lstlisting}
+B:matrix([1,0],[0,1],[1,1])$
+/* Eliminar s,t: x=s, y=t, z=s+t. */
+linsolve([a+c,b+c],[a,b,c]);
+nullspace(transpose(B));
+A:matrix([1,1,-1])$
+A.B;
+linsolve([x+y-z],[x,y,z]);
+3-rank(A); nullspace(A); nullity(A);
+\end{lstlisting}
+\section{Suma, intersección y fórmula de las dimensiones}
+Dados subespacios $U,W\subseteq\mathbb R^n$, se define $U+W=\{u+w:u\in U,w\in W\}$ y $U\cap W=\{x:x\in U\text{ y }x\in W\}$. Ambos son subespacios.
+
+Si $B_U,B_W$ contienen bases por columnas, la suma está generada por las columnas de $[B_U\ B_W]$. Para calcular una base se seleccionan columnas independientes de la matriz original. La intersección se obtiene resolviendo $B_U s=B_W t$ y reconstruyendo los vectores comunes. Si se conocen ecuaciones implícitas, basta reunir ambos sistemas.
+\[\boxed{\dim(U+W)=\dim U+\dim W-\dim(U\cap W).}\]
+Para justificar la identidad, se extiende una base de $U\cap W$ a sendas bases de $U$ y $W$; la unión de las extensiones con la base común es una base de la suma. La suma es directa, $U\oplus W$, si y solo si $U\cap W=\{0\}$; en ese caso cada descomposición es única.
+
+\textbf{Ejemplo.} $U=\{z=x+y\}$ y $W=\{z=2x\}$. La intersección se obtiene imponiendo simultáneamente ambas ecuaciones. Comprobar que la suma es todo $\mathbb R^3$.
+\begin{lstlisting}
+BU:matrix([1,0],[0,1],[1,1])$
+BW:matrix([1,0],[0,1],[2,0])$
+AS:addcol(BU,BW)$
+AI:addrow(matrix([1,1,-1]),[2,0,-1])$
+linsolve([x+y-z,2*x-z],[x,y,z]);
+columnspace(AS); nullspace(AI);
+I:matrix([1],[1],[2])$
+AI.I;
+[rank(BU),rank(BW),rank(AS),3-rank(AI)];
+rank(AS)=rank(BU)+rank(BW)-(3-rank(AI));
+\end{lstlisting}
+\section{Trabajo individual}
+\begin{enumerate}
+\item Estudiar la familia $\begin{pmatrix}1\\2\\0\end{pmatrix},\begin{pmatrix}2\\1\\1\end{pmatrix},\begin{pmatrix}3\\3\\1\end{pmatrix}$. Hallar una relación de dependencia, una base del subespacio generado por los vectores y completarla a una base de $\mathbb R^3$.
+\item Determinar para qué valores reales de $a$ los vectores $\begin{pmatrix}1\\0\\1\end{pmatrix},\begin{pmatrix}0\\1\\1\end{pmatrix},\begin{pmatrix}1\\1\\a\end{pmatrix}$ forman una base. Analizar el caso excepcional.
+\item Sean las bases $\mathcal B$ y $\mathcal C$ dadas por las columnas de las matrices
+\[P_{\mathcal B}=\begin{pmatrix}1&2&0\\2&3&0\\1&0&1\end{pmatrix},\quad P_{\mathcal C}=\begin{pmatrix}2&1&0\\1&1&0\\0&1&1\end{pmatrix},\quad u=\begin{pmatrix}3\\-1\\2\end{pmatrix}.\]
+Calcular las coordenadas de $u$ en ambas bases y las matrices de cambio en ambos sentidos.
+\item Hallar una base y ecuaciones paramétricas del subespacio de $\mathbb R^3$ definido por $x+y-z=0$, $y+z=0$. Obtener su dimensión.
+\item Obtener ecuaciones implícitas del subespacio generado por $\begin{pmatrix}1\\2\\0\end{pmatrix},\begin{pmatrix}0\\1\\1\end{pmatrix}$.
+\item Sean $U=\{z=0\}$ y $W=\langle\begin{pmatrix}1\\0\\1\end{pmatrix}\rangle$. Hallar suma e intersección. Decidir si la suma es directa y descomponer $\begin{pmatrix}2\\3\\4\end{pmatrix}$.
+\item En $\mathbb R^3$, sean $U=\langle e_1,e_2\rangle$ y $W=\langle e_2,e_3\rangle$. Hallar bases de suma e intersección y verificar la fórmula de las dimensiones. ¿Es directa?
+\end{enumerate}
+\section{Cuestiones de comprensión}
+\begin{enumerate}
+\item ¿Puede una familia dependiente generar todo el espacio? Dar un ejemplo.
+\item ¿Por qué el orden de los vectores de una base afecta a las coordenadas?
+\item ¿Es suficiente comprobar $AB=0$ para afirmar que $\ker A=\operatorname{Im}B$? ¿Qué condición de dimensiones falta?
+\item ¿Puede la unión de dos subespacios ser un subespacio? Justificar cuándo ocurre.
+\item ¿Qué relación existe entre suma directa y unicidad de la descomposición?
+\end{enumerate}
+\medskip\noindent\textit{Referencia:} Manual de Maxima, capítulos Matrices and Linear Algebra y Package linearalgebra (maxima.sourceforge.io).\end{document}

@@ -1,0 +1,200 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+
+/* [wxMaxima: title start ]
+Práctica III. Derivadas de orden superior y fórmula de Taylor
+   [wxMaxima: title end   ] */
+
+/* [wxMaxima: comment start ]
+UPCT | Cálculo diferencial
+Nombre y apellidos: ____________________
+Ejecutar con Mayús+Intro y justificar los resultados.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Derivadas sucesivas y permutabilidad
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Convención: f_xy significa derivar primero respecto de x y después respecto de y. Si f es C^2 en un entorno, las mixtas coinciden (Schwarz). Si f es C^k, se puede permutar el orden hasta k. Ejemplo: f=x^2*y+exp(x*y).
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(all)$
+f:x^2*y+exp(x*y)$
+fxy:diff(diff(f,x),y);
+fyx:diff(diff(f,y),x);
+ratsimp(fxy-fyx);
+ratsimp(diff(diff(f,x,2),y)-diff(diff(f,y),x,2));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Cuando no se pueden permutar las derivaciones
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+g(0,0)=0; fuera del origen g=xy(x^2-y^2)/(x^2+y^2). Usar cocientes incrementales, no sustituir 0/0. Las parciales sobre los ejes son g_x(0,y)=-y y g_y(x,0)=x. Las mixtas en el origen son -1 y 1. Justificar la diferenciabilidad con |g| <= (x^2+y^2)/2.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+g(x,y):=x*y*(x^2-y^2)/(x^2+y^2)$
+/* Para y distinto de cero y x distinto de cero */
+gx_eje:limit(ratsimp(g(t,y)/t),t,0);
+gy_eje:limit(ratsimp(g(x,t)/t),t,0);
+limit(ratsimp((-t)/t),t,0);
+limit(ratsimp(t/t),t,0);
+gxy:ratsimp(diff(diff(g(x,y),x),y))$
+gyx:ratsimp(diff(diff(g(x,y),y),x))$
+ratsimp(gxy-gyx);
+limit(subst(y=0,gxy),x,0);
+limit(subst(x=0,gxy),y,0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Fórmula de Taylor de segundo orden
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Si f es C^2, T2=f(P)+grad f(P)·h+1/2 h^T H h, con resto o(||h||^2). Ejemplo exp(x)*cos(y) en el origen. Comparar aproximaciones de grados uno y dos en (0.1,0.2).
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+f:exp(x)*cos(y)$
+P:[x=0,y=0]$
+G:[diff(f,x),diff(f,y)]$
+H:matrix([diff(f,x,2),diff(diff(f,x),y)],
+         [diff(diff(f,y),x),diff(f,y,2)])$
+G0:subst(P,G);
+H0:subst(P,H);
+T1:subst(P,f)+G0[1]*x+G0[2]*y;
+T2:expand(T1+(H0[1,1]*x^2+2*H0[1,2]*x*y+H0[2,2]*y^2)/2);
+Q:[x=1/10,y=1/5]$
+float(subst(Q,[f,T1,T2]));
+float(subst(Q,[abs(f-T1),abs(f-T2)]));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Taylor de orden arbitrario y resto
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Taylor de grado total n por la función auxiliar phi(t)=f(a+t*u,b+t*v). Si las parciales de orden n+1 están acotadas por M en el segmento, |R_n| <= M*(|u|+|v|)^(n+1)/(n+1)!.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+taytotal(expr,a,b,n):=block([tt,aux],
+ aux:subst([x=a+tt*u,y=b+tt*v],expr),
+ expand(subst(tt=1,ratdisrep(taylor(aux,tt,0,n)))))$
+T4:taytotal(exp(x)*cos(y),0,0,4);
+T3:taytotal(exp(x)*cos(y),0,0,3);
+float(subst([u=1/10,v=1/5],T4));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Aplicaciones: aproximación y extremos relativos
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Aplicación 1: aproximar sqrt(4.1) alrededor de (1,3) con h=(0.2,-0.1). Aplicación 2: clasificar puntos críticos por la hessiana. Si det H=0, estudiar términos superiores o trayectorias. Comparar cinco ejemplos.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+A1:taytotal(sqrt(x+y),1,3,1);
+A2:taytotal(sqrt(x+y),1,3,2);
+float(subst([u=1/5,v=-1/10],[A1,A2]));
+float(abs(sqrt(41/10)-subst([u=1/5,v=-1/10],A2)));
+float((1/10)^3/(16*4^(5/2)));
+hess(expr):=matrix([diff(expr,x,2),diff(diff(expr,x),y)],
+ [diff(diff(expr,y),x),diff(expr,y,2)])$
+for expr in [x^2+2*x*y+3*y^2,x^2-y^2,-x^2-y^2,x^4+y^4,x^4-y^4] do
+ block([hh:subst([x=0,y=0],hess(expr))],print(expr,hh,determinant(hh)))$
+wxplot3d(x^4-y^4,[x,-1,1],[y,-1,1])$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Extremos relativos en dominios abiertos: Fermat y Hessiana
+   [wxMaxima: section end   ] */
+/* [wxMaxima: comment start ]
+Un extremo relativo se define comparando f(P) con f(P+h) para todo h suficientemente pequeño. Es estricto si la desigualdad es estricta para h no nulo. En un abierto, si f es diferenciable y tiene un extremo, grad f(P)=0 (Fermat). No basta que el gradiente se anule.
+Si f es C2, la hessiana H es la matriz simétrica de segundas parciales. En un mínimo es semidefinida positiva; en un máximo, semidefinida negativa. En un punto estacionario, Taylor implica que H definida positiva da mínimo estricto; definida negativa, máximo estricto; indefinida, silla. Si H es no singular, estas condiciones clasifican completamente los puntos estacionarios. En dos variables: det H>0 y H[1,1]>0, mínimo; det H>0 y H[1,1]<0, máximo; det H<0, silla; det H=0, no concluyente.
+Ejemplo: resolver grad F=0 para F=x^3-3*x+y^2 y evaluar H en cada punto.
+   [wxMaxima: comment end   ] */
+/* [wxMaxima: input   start ] */
+F:x^3-3*x+y^2$
+G:[diff(F,x),diff(F,y)];
+pts:solve([G[1]=0,G[2]=0],[x,y]);
+H:hess(F);
+for pt in pts do block([hh:subst(pt,H)],print(pt,hh,determinant(hh),hh[1,1]))$
+/* [wxMaxima: input   end   ] */
+/* [wxMaxima: comment start ]
+(1,0): mínimo estricto; (-1,0): silla. Explica los signos usando Taylor. Compara ahora x^4+y^4, -x^4-y^4, x^4-y^4 y (x^2-y^2)^2: todas tienen H nula en el origen.
+   [wxMaxima: comment end   ] */
+/* [wxMaxima: section start ]
+Trabajo individual
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+1. f=x^3*y^2+sin(x*y): comparar mixtas de orden 2 y 3.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Escribe aquí tus comandos. */
+
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+2. Estudiar continuidad de g_xy por los ejes.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Escribe aquí tus comandos. */
+
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+3. Taylor 3 de log(1+x+y) en el origen. Aproximar en (0.1,0.1).
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Escribe aquí tus comandos. */
+
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+4. Taylor 2 de x^2*y alrededor de (1,2) y resto exacto.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Escribe aquí tus comandos. */
+
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+5. Clasificar todos los puntos estacionarios de x^3-3*x+y^3-3*y.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Escribe aquí tus comandos. */
+
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+6. Clasificar origen de (x^2+y^2)^2 y (x^2-y^2)^2.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Escribe aquí tus comandos. */
+
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Cuestiones de comprensión
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+1. ¿Basta la existencia de las mixtas?
+2. ¿Por qué truncar por grado total?
+3. ¿Qué ocurre si det H=0?
+   [wxMaxima: comment end   ] */
+
+/* Maxima can not load/batch files which end with a comment! */
+"Created with wxMaxima"$

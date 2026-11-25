@@ -1,0 +1,244 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+
+/* [wxMaxima: comment start ]
+   UPCT | Cálculo diferencial
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: title start ]
+Límites direccionales y límites iterados
+   [wxMaxima: title end   ] */
+
+/* [wxMaxima: comment start ]
+Nombre y apellidos: ____________________
+Objetivos: calcular límites sobre rectas, calcular límites iterados y justificar la no existencia del límite doble. Ejecutar las celdas con Mayús+Intro. En cada ejercicio escribir una conclusión matemática, no solo el resultado de Maxima.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(all)$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+1. Límites direccionales
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Si dos rectas admisibles que pasan por (a,b) proporcionan límites distintos, el límite doble no existe. Parametrizamos mediante x=a+u*t, y=b+v*t, con (u,v) distinto de (0,0). La orden subst sustituye las variables y limit calcula el límite ordinario. Las rectas deben contener puntos del dominio arbitrariamente próximos al punto estudiado.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+f(x,y):=x*y/(x^2+y^2)$
+limit(f(t,0),t,0);
+limit(f(t,t),t,0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Se obtienen 0 y 1/2. Por tanto, no existe el límite doble. Ahora estudiamos la familia de rectas y=m*x (la vertical se trata aparte).
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+limit(ratsimp(f(t,m*t)),t,0);
+limit(f(0,t),t,0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Pregunta: ¿para qué pendientes se obtiene cero? ¿Qué sucede con m=-1? Comprobarlo.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+limit(f(t,-t),t,0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+2. Límites iterados
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Calculamos primero el límite respecto de una variable, manteniendo fija la otra, y después el límite exterior. Si ambos iterados existen y son distintos, no existe el límite doble. El criterio se aplica aquí a funciones definidas en un entorno perforado del punto. Los valores de la función en el punto no intervienen.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+g(x,y):=(x^2-y^2)/(x^2+y^2)$
+A:limit(g(x,y),y,0);
+L1:limit(A,x,0);
+B:limit(g(x,y),x,0);
+L2:limit(B,y,0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Los límites iterados son 1 y -1. Escribir la justificación. Comparar también los límites sobre los ejes.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+limit(g(t,0),t,0);
+limit(g(0,t),t,0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+3. Limitaciones de los dos criterios
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Ejemplo A: los límites iterados de f coinciden, pero ya sabemos que el límite doble no existe.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+limit(limit(f(x,y),y,0),x,0);
+limit(limit(f(x,y),x,0),y,0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Ejemplo B: todos los límites sobre rectas coinciden y también los iterados, pero el límite doble no existe. Estudiamos una trayectoria parabólica.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+h(x,y):=x^2*y/(x^4+y^2)$
+/* Para m distinto de cero */
+limit(ratsimp(h(t,m*t)),t,0);
+limit(h(t,0),t,0);
+limit(h(0,t),t,0);
+limit(limit(h(x,y),y,0),x,0);
+limit(limit(h(x,y),x,0),y,0);
+limit(ratsimp(h(t,t^2)),t,0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Sobre las rectas el límite vale cero (para m no nulo, simplificar a m*t/(t^2+m^2)); sobre y=x^2 vale 1/2. Por tanto, no existe el límite doble. Si Maxima pregunta si m es cero, responder no para la primera celda. El caso m=0 se comprueba aparte.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+4. Visualización gráfica
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+La gráfica ayuda a identificar comportamientos distintos según la trayectoria, pero no constituye una demostración. Se representa una región próxima al origen; el punto singular puede aparecer como hueco o artefacto gráfico.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+wxplot3d(f(x,y),[x,-1,1],[y,-1,1],[grid,60,60]);
+wxplot3d(h(x,y),[x,-1,1],[y,-1,1],[grid,60,60]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+5. Trabajo individual
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+En cada ejercicio: identificar el punto, calcular los dos iterados, estudiar y=b+m*(x-a) y la recta vertical, y concluir justificadamente. Si los criterios no deciden, buscar otra trayectoria o una estimación. Completar las celdas con las órdenes necesarias.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: subsection start ]
+Ejercicio 1. Punto (0,0)
+   [wxMaxima: subsection end   ] */
+
+/* [wxMaxima: comment start ]
+Comparar los ejes.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+F1(x,y):=x^2/(x^2+y^2)$
+/* Escribir aquí los cálculos. */
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Conclusión razonada: ____________________
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: subsection start ]
+Ejercicio 2. Punto (0,0)
+   [wxMaxima: subsection end   ] */
+
+/* [wxMaxima: comment start ]
+Comparar las pendientes 1 y -1.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+F2(x,y):=x*y/(x^2+2*y^2)$
+/* Escribir aquí los cálculos. */
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Conclusión razonada: ____________________
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: subsection start ]
+Ejercicio 3. Punto (1,-2)
+   [wxMaxima: subsection end   ] */
+
+/* [wxMaxima: comment start ]
+Parametrizar las rectas mediante x=1+t, y=-2+m*t.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+F3(x,y):=(x-1)*(y+2)/((x-1)^2+(y+2)^2)$
+/* Escribir aquí los cálculos. */
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Conclusión razonada: ____________________
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: subsection start ]
+Ejercicio 4. Punto (0,0)
+   [wxMaxima: subsection end   ] */
+
+/* [wxMaxima: comment start ]
+Estudiar además y=x^3.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+F4(x,y):=x^3*y/(x^6+y^2)$
+/* Escribir aquí los cálculos. */
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Conclusión razonada: ____________________
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: subsection start ]
+Ejercicio 5. Punto (0,0)
+   [wxMaxima: subsection end   ] */
+
+/* [wxMaxima: comment start ]
+Demostrar la existencia mediante |f| <= |y|. No basta comprobar rectas.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+F5(x,y):=x^2*y/(x^2+y^2)$
+/* Escribir aquí los cálculos. */
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Conclusión razonada: ____________________
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: subsection start ]
+Ejercicio 6. Punto (0,0)
+   [wxMaxima: subsection end   ] */
+
+/* [wxMaxima: comment start ]
+Comparar los iterados y estudiar y=x.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+F6(x,y):=(x^2-y^4)/(x^2+y^4)$
+/* Escribir aquí los cálculos. */
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Conclusión razonada: ____________________
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+6. Cuestiones de comprensión
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+1. ¿Es suficiente que los iterados coincidan para que exista el límite doble?
+2. ¿Es suficiente que coincidan todos los límites direccionales?
+3. ¿Qué diferencia hay entre una dirección y una trayectoria curvilínea?
+4. ¿Qué relación hay entre la continuidad en un punto y la existencia del límite?
+Entrega: guardar el cuaderno ejecutado con nombre y apellidos, incluyendo las conclusiones.
+   [wxMaxima: comment end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

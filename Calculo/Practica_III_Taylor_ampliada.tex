@@ -1,0 +1,148 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage{amsmath,amssymb,geometry,fancyhdr,xcolor,listings,tikz,array}
+\geometry{margin=2.4cm,headheight=16pt}
+\pagestyle{fancy}\fancyhf{}\lhead{UPCT}\rhead{Cálculo diferencial}\lfoot{Prácticas de wxMaxima}\rfoot{\thepage}
+\definecolor{azul}{RGB}{23,65,105}
+\lstset{basicstyle=\ttfamily\small,backgroundcolor=\color{black!4},frame=single,rulecolor=\color{black!15},breaklines=true,columns=fullflexible}
+
+\begin{document}
+\begin{center}{\large Práctica de laboratorio III}\\[5pt]{\LARGE\bfseries\color{azul} Derivadas de orden superior y fórmula de Taylor}\end{center}
+\noindent Nombre y apellidos: \hrulefill\par\medskip
+\noindent\textbf{Objetivos.} Comprender la permutabilidad, distinguir hipótesis suficientes de necesarias, construir polinomios de Taylor y aplicarlos a aproximaciones y extremos. Ejecutar las celdas con Mayús+Intro y justificar los resultados.
+\section{Derivadas sucesivas y permutabilidad}
+Escribimos $f_{xy}=\partial_y(\partial_x f)$ y $f_{yx}=\partial_x(\partial_y f)$. Las derivadas de orden superior se obtienen derivando sucesivamente. El teorema de Schwarz (o Clairaut) garantiza que, si las derivadas parciales de segundo orden son continuas en un entorno abierto de $P$, entonces
+\[\boxed{f_{xy}(P)=f_{yx}(P).}\]
+Más generalmente, si $f\in C^k(U)$, el orden de las $k$ derivaciones es indiferente. Es una condición suficiente, no necesaria.
+\subsection*{Ejemplo guiado} Para $f(x,y)=x^2y+e^{xy}$, calcular las dos mixtas y comprobar su igualdad. Después comparar dos derivadas de tercer orden.
+\begin{lstlisting}
+kill(all)$
+f:x^2*y+exp(x*y)$
+fxy:diff(diff(f,x),y);
+fyx:diff(diff(f,y),x);
+ratsimp(fxy-fyx);
+ratsimp(diff(diff(f,x,2),y)-diff(diff(f,y),x,2));
+\end{lstlisting}
+\section{Cuando no se pueden permutar las derivaciones}
+Sea $g(0,0)=0$ y, para $(x,y)\ne(0,0)$,
+\[g(x,y)=\frac{xy(x^2-y^2)}{x^2+y^2}.\]
+No se puede sustituir directamente el origen en la expresión racional. Por definición, $g_x(0,y)=-y$ y $g_y(x,0)=x$, incluidas las coordenadas nulas. Por consiguiente,
+\[\boxed{g_{xy}(0,0)=-1,\qquad g_{yx}(0,0)=1.}\]
+Las mixtas existen en el origen, pero no son iguales. Comprobar, fuera del origen, la igualdad de las mixtas y estudiar su continuidad por los ejes. La función es diferenciable en el origen: $|g(x,y)|\le (x^2+y^2)/2$.
+\begin{lstlisting}
+g(x,y):=x*y*(x^2-y^2)/(x^2+y^2)$
+/* Para y distinto de cero y x distinto de cero */
+gx_eje:limit(ratsimp(g(t,y)/t),t,0);
+gy_eje:limit(ratsimp(g(x,t)/t),t,0);
+limit(ratsimp((-t)/t),t,0);
+limit(ratsimp(t/t),t,0);
+gxy:ratsimp(diff(diff(g(x,y),x),y))$
+gyx:ratsimp(diff(diff(g(x,y),y),x))$
+ratsimp(gxy-gyx);
+limit(subst(y=0,gxy),x,0);
+limit(subst(x=0,gxy),y,0);
+\end{lstlisting}
+\section{Fórmula de Taylor de segundo orden}
+Si $f\in C^2$ en un entorno de $P=(a,b)$, con $h=(u,v)$,
+\[f(P+h)=f(P)+\nabla f(P)\cdot h+\tfrac12 h^T H_f(P)h+o(\|h\|^2),\]
+ donde $H_f$ es la matriz hessiana. El polinomio de Taylor es
+\[\boxed{T_2=f(P)+f_x(P)u+f_y(P)v+\tfrac12(f_{xx}(P)u^2+2f_{xy}(P)uv+f_{yy}(P)v^2).}\]
+\subsection*{Ejemplo guiado} Para $f(x,y)=e^x\cos y$ en $(0,0)$ resulta $T_2=1+x+(x^2-y^2)/2$. Calcular la aproximación en $(0.1,0.2)$ y el error absoluto. Comparar con el Taylor de grado uno.
+\begin{lstlisting}
+f:exp(x)*cos(y)$
+P:[x=0,y=0]$
+G:[diff(f,x),diff(f,y)]$
+H:matrix([diff(f,x,2),diff(diff(f,x),y)],
+         [diff(diff(f,y),x),diff(f,y,2)])$
+G0:subst(P,G);
+H0:subst(P,H);
+T1:subst(P,f)+G0[1]*x+G0[2]*y;
+T2:expand(T1+(H0[1,1]*x^2+2*H0[1,2]*x*y+H0[2,2]*y^2)/2);
+Q:[x=1/10,y=1/5]$
+float(subst(Q,[f,T1,T2]));
+float(subst(Q,[abs(f-T1),abs(f-T2)]));
+\end{lstlisting}
+\section{Taylor de orden arbitrario y resto}
+Para $f\in C^{n+1}$ en un entorno del segmento $[P,P+h]$, aplicamos Taylor de una variable a $\phi(t)=f(P+th)$. Así,
+\[T_n(P+h)=\sum_{i+j\le n}\frac{\partial_x^i\partial_y^j f(P)}{i!j!}u^iv^j.\]
+El resto de Lagrange es $R_n=\phi^{(n+1)}(\theta)/(n+1)!$ para algún $0<\theta<1$. Si las parciales de orden $n+1$ están acotadas por $M$ en el segmento, entonces
+\[|R_n|\le\frac{M}{(n+1)!}(|u|+|v|)^{n+1}.\]
+La sustitución auxiliar $t$ permite truncar por grado total, no por grado separado de cada variable. Para $e^x\cos y$, obtener $T_4$ y comprobar que no contiene monomios de grado superior a cuatro.
+\begin{lstlisting}
+taytotal(expr,a,b,n):=block([tt,aux],
+ aux:subst([x=a+tt*u,y=b+tt*v],expr),
+ expand(subst(tt=1,ratdisrep(taylor(aux,tt,0,n)))))$
+T4:taytotal(exp(x)*cos(y),0,0,4);
+T3:taytotal(exp(x)*cos(y),0,0,3);
+float(subst([u=1/10,v=1/5],T4));
+\end{lstlisting}
+\section{Aplicaciones: aproximación y extremos relativos}
+\subsection*{Aproximación y control del error} Para $F(x,y)=\sqrt{x+y}$ en $(1,3)$, se aproxima $\sqrt{4.1}$ mediante $T_1$ y $T_2$ con $(u,v)=(0.2,-0.1)$. En este segmento la tercera derivada de $s\mapsto\sqrt{s}$ está acotada por $3/(8\cdot4^{5/2})$. Usar Taylor en la variable $s=x+y$ para acotar el error por $0.1^3/(16\cdot4^{5/2})$.
+\subsection*{Extremos relativos en un abierto}
+Sea $\Omega\subset\mathbb R^n$ abierto y $P\in\Omega$. Un mínimo relativo satisface $f(P+h)\ge f(P)$ para todo $h$ suficientemente pequeño; un máximo satisface la desigualdad inversa. El extremo es estricto si la desigualdad es estricta para $h\ne0$.
+
+\textbf{Condición necesaria (Fermat).} Si $f$ es diferenciable en $P$ y tiene allí un extremo relativo, entonces $\boxed{\nabla f(P)=0}$. En efecto, cada función $t\mapsto f(P+te_i)$ tiene un extremo interior en $t=0$ y su derivada se anula. La recíproca es falsa: $x^2-y^2$ en el origen.
+
+\textbf{Matriz hessiana.} Para $f\in C^2(\Omega)$, $H_f(P)=(\partial_{x_j}\partial_{x_i}f(P))_{i,j=1}^n$ es simétrica por Schwarz. En dos variables,
+\[H_f(P)=\begin{pmatrix}f_{xx}(P)&f_{xy}(P)\\f_{yx}(P)&f_{yy}(P)\end{pmatrix},\qquad \Delta=\det H_f(P).\]
+No debe confundirse la matriz con su determinante. Una matriz simétrica es definida positiva si $h^THh>0$ para todo $h\ne0$, y semidefinida positiva si $h^THh\ge0$; las negativas se definen invirtiendo los signos. Es indefinida si la forma toma ambos signos.
+
+\textbf{Condiciones necesarias de segundo orden.} En un mínimo la hessiana es semidefinida positiva y en un máximo semidefinida negativa. Basta aplicar el criterio necesario de segunda derivada a $t\mapsto f(P+th)$ para cada vector $h$.
+
+\textbf{Condiciones suficientes.} Si $\nabla f(P)=0$, Taylor da
+\[f(P+h)-f(P)=\tfrac12 h^TH_f(P)h+o(\|h\|^2).\]
+Si $H_f(P)$ es definida positiva, existe $c>0$ tal que $h^TH_f(P)h\ge c\|h\|^2$ (mínimo de la forma sobre la esfera unidad); el resto es menor en valor absoluto que $c\|h\|^2/4$ cerca de $P$. Por tanto hay un mínimo estricto. El caso negativo es análogo. Si es indefinida, dos rectas dan incrementos de signos opuestos: punto de silla.
+\[
+\begin{array}{c|l}
+\text{En dos variables, con }\nabla f(P)=0 & \text{Clasificación}\\\hline
+\Delta>0,\ f_{xx}>0 & \text{Mínimo estricto}\\
+\Delta>0,\ f_{xx}<0 & \text{Máximo estricto}\\
+\Delta<0 & \text{Silla}\\
+\Delta=0 & \text{No concluyente}
+\end{array}
+\]
+Si la hessiana es no singular, el criterio es necesario y suficiente para clasificar los extremos: un mínimo requiere y equivale a definida positiva, y un máximo a definida negativa. Sin esta hipótesis no hay equivalencia general basada solo en las derivadas de segundo orden.
+
+\subsection*{Ejemplo guiado: hallar y clasificar todos los puntos estacionarios}
+Para $F=x^3-3x+y^2$, resolver $\nabla F=0$ y evaluar la hessiana en cada solución.
+\begin{lstlisting}
+F:x^3-3*x+y^2$
+G:[diff(F,x),diff(F,y)];
+pts:solve([G[1]=0,G[2]=0],[x,y]);
+H:matrix([diff(F,x,2),diff(F,x,1,y,1)],
+ [diff(F,y,1,x,1),diff(F,y,2)]);
+for pt in pts do block([hh:subst(pt,H)],
+ print(pt,hh,determinant(hh),hh[1,1]))$
+\end{lstlisting}
+En $(1,0)$ hay un mínimo estricto y en $(-1,0)$ un punto de silla.
+
+Comparar $x^2+2xy+3y^2$, $x^2-y^2$, $-x^2-y^2$ y las funciones $x^4+y^4$, $x^4-y^4$. Las dos últimas tienen la misma hessiana nula en el origen, pero distinta naturaleza.
+\begin{lstlisting}
+A1:taytotal(sqrt(x+y),1,3,1);
+A2:taytotal(sqrt(x+y),1,3,2);
+float(subst([u=1/5,v=-1/10],[A1,A2]));
+float(abs(sqrt(41/10)-subst([u=1/5,v=-1/10],A2)));
+float((1/10)^3/(16*4^(5/2)));
+hess(expr):=matrix([diff(expr,x,2),diff(diff(expr,x),y)],
+ [diff(diff(expr,y),x),diff(expr,y,2)])$
+for expr in [x^2+2*x*y+3*y^2,x^2-y^2,-x^2-y^2,x^4+y^4,x^4-y^4] do
+ block([hh:subst([x=0,y=0],hess(expr))],print(expr,hh,determinant(hh)))$
+wxplot3d(x^4-y^4,[x,-1,1],[y,-1,1])$
+\end{lstlisting}
+\section{Trabajo individual}\begin{enumerate}
+\item Para $f=x^3y^2+\sin(xy)$, comprobar la igualdad de las mixtas de segundo orden y de las derivadas con dos $x$ y una $y$.
+\item Para $g$ de la sección 2, estudiar la continuidad de $g_{xy}$ en el origen por ambos ejes.
+\item Calcular $T_3$ de $\log(1+x+y)$ en el origen. Aproximar el valor en $(0.1,0.1)$ y calcular el error.
+\item Calcular $T_2$ de $x^2y$ alrededor de $(1,2)$ y determinar exactamente el resto.
+\item Clasificar todos los puntos estacionarios de $f=x^3-3x+y^3-3y$.
+\item Clasificar el origen para $f=x^4+2x^2y^2+y^4$ y $g=x^4-2x^2y^2+y^4$. ¿Son estrictos los extremos?
+\end{enumerate}
+\section{Cuestiones de comprensión}
+\begin{enumerate}
+\item ¿Es suficiente la existencia de las dos derivadas mixtas para que coincidan?
+\item ¿Por qué no basta calcular Taylor separadamente en cada variable?
+\item ¿En qué condiciones es aplicable el criterio hessiano? ¿Qué sucede si su determinante es cero?
+\end{enumerate}
+\end{document}

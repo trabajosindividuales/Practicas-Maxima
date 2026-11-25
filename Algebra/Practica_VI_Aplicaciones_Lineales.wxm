@@ -1,0 +1,204 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+
+/* [wxMaxima: title start ]
+Práctica VI. Aplicaciones lineales
+   [wxMaxima: title end   ] */
+
+/* [wxMaxima: comment start ]
+UPCT | GITS. Ejecutar en orden con Mayús+Intro. Vectores por columnas. Justificar los resultados.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Linealidad y matriz asociada
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Las columnas son las imágenes de los vectores canónicos. Comprueba la linealidad de f y encuentra un contraejemplo para g.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(all)$
+load("linearalgebra")$
+f(x,y):=matrix([x+y],[x-y],[2*x])$
+A:addcol(f(1,0),f(0,1));
+A.matrix([x],[y]);
+f(x,y);
+rank(A);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Núcleo, imagen y fórmula de las dimensiones
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Resuelve primero el sistema homogéneo; después usa nullspace y columnspace (devuelven una expresión span con los vectores de una base).
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+G:matrix([1,1,0],[0,1,1])$
+linsolve([x+y=0,y+z=0],[x,y,z]);
+nullspace(G); columnspace(G);
+rank(G); nullity(G);
+rank(G)+nullity(G);
+rank(A)+nullity(A);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Imagen y antiimagen de un subespacio
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Obtén las imágenes de la base de U y las ecuaciones de la antiimagen por sustitución. La antiimagen existe aunque g no sea invertible.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+U:matrix([1,0],[0,1],[1,0])$
+GU:G.U;
+columnspace(GU); rank(GU);
+expr:matrix([1,1]).G;
+linsolve([x+2*y+z=0],[x,y,z]);
+nullspace(expr);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Inyectividad, sobreyectividad e isomorfismos
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Compara los rangos con las dimensiones de origen y destino, no con el número total de entradas.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+H:matrix([2,1],[1,1])$
+K:matrix([1,1,0],[0,1,1],[1,2,1])$
+for J in [A,G,H,K] do print(matrix_size(J),rank(J),nullity(J))$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Aplicación inversa
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Resuelve el sistema y comprueba las dos composiciones.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+linsolve([2*x+y=u,x+y=v],[x,y]);
+Hi:invert(H);
+Hi.H; H.Hi;
+Hi.matrix([u],[v]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Cambio de bases en una aplicación lineal
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+P tiene orden 2 y Q orden 3. Comprueba Q.M=A.P y reconstruye la imagen de un vector.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+P:matrix([1,1],[0,1])$
+Q:matrix([1,0,1],[0,1,0],[0,0,1])$
+M:invert(Q).A.P;
+Q.M-A.P;
+c:matrix([2],[-1])$
+Q.M.c; A.P.c;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Matrices equivalentes y semejantes
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+En la semejanza se utiliza la misma base en dominio y codominio; en la equivalencia las bases pueden elegirse independientemente.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+Hs:invert(P).H.P;
+P.Hs-H.P;
+rank(H); rank(Hs);
+I:ident(2)$
+rank(I); rank(2*I);
+invert(P).I.P;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Interpretación del teorema de Rouché--Frobenius
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Compara rangos, resuelve los sistemas compatibles y comprueba una solución particular y el núcleo.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+b1:matrix([3],[1],[4])$
+b2:matrix([3],[1],[5])$
+rank(A); rank(addcol(A,b1)); rank(addcol(A,b2));
+linsolve([x+y=3,x-y=1,2*x=4],[x,y]);
+b3:matrix([3],[1])$
+rank(G); rank(addcol(G,b3));
+linsolve([x+y=3,y+z=1],[x,y,z]);
+G.matrix([3],[0],[1]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Ejercicios de trabajo individual
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Ejercicio 1. f(x,y)=(2x-y,x+y,3x). Matriz, núcleo, imagen y clasificación.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Escribe aquí tus cálculos. */
+0$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Ejercicio 2. g(x,y,z)=(x-z,y+z); U: x+y=0; W: u-v=0.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Escribe aquí tus cálculos. */
+0$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Ejercicio 3. h_a(x,y)=(x+a*y,a*x+y). Discute a y calcula la inversa.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Escribe aquí tus cálculos. */
+0$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Ejercicio 4. k(x,y,z)=(x+y,y+z,z), base Q del ejemplo.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Escribe aquí tus cálculos. */
+0$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Ejercicio 5. Ejercicio 1 con bases P y Q.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Escribe aquí tus cálculos. */
+0$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Ejercicio 6. Sistema x+y=2, y+z=1, x+2y+z=b.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Escribe aquí tus cálculos. */
+0$
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can not load this file! */
+"Created with wxMaxima"$

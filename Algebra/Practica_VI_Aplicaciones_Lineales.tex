@@ -1,0 +1,136 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage{amsmath,amssymb,geometry,fancyhdr,xcolor,listings,tikz,array}
+\geometry{margin=2.4cm,headheight=16pt}
+\pagestyle{fancy}\fancyhf{}\lhead{UPCT}\rhead{GITS}\lfoot{Prácticas de wxMaxima}\rfoot{\thepage}
+\definecolor{azul}{RGB}{23,65,105}
+\lstset{basicstyle=\ttfamily\small,backgroundcolor=\color{black!4},frame=single,rulecolor=\color{black!15},breaklines=true,columns=fullflexible}
+
+\begin{document}
+\begin{center}{\large Práctica de laboratorio VI}\\[5pt]{\LARGE\bfseries\color{azul} Álgebra lineal: aplicaciones lineales}\end{center}
+\noindent Nombre y apellidos: \hrulefill\par\medskip
+\noindent\textbf{Objetivos.} Relacionar aplicaciones lineales, matrices y sistemas de ecuaciones mediante ejemplos en $\mathbb R^2$ y $\mathbb R^3$. Ejecutar las celdas con Mayús+Intro y justificar cada resultado. Se emplean vectores por columnas y aritmética exacta.
+\section{Linealidad y matriz asociada}
+Una aplicación $f:V\to W$ es lineal si $f(\alpha u+\beta v)=\alpha f(u)+\beta f(v)$ para cualesquiera vectores y escalares. En bases ordenadas $\mathcal B=(b_1,\ldots,b_n)$ y $\mathcal D$ de origen y destino, las columnas de $M_{\mathcal D\leftarrow\mathcal B}(f)$ son las coordenadas de $f(b_i)$ en $\mathcal D$. Si ambas bases son canónicas escribimos $M_{\mathcal C}(f)$.
+
+\textbf{Ejemplo.} $f:\mathbb R^2\to\mathbb R^3$, $(x,y)\mapsto(x+y,x-y,2x)$. Calculamos las imágenes de los vectores canónicos y construimos
+\[A=\begin{pmatrix}1&1\\1&-1\\2&0\end{pmatrix},\qquad f\begin{pmatrix}x\\y\end{pmatrix}=A\begin{pmatrix}x\\y\end{pmatrix}.\]
+Comprueba que la tercera componente es la suma de las dos primeras. Contrasta con $g(x,y)=(x+y,xy)$, que no es lineal.
+\begin{lstlisting}
+kill(all)$
+load("linearalgebra")$
+f(x,y):=matrix([x+y],[x-y],[2*x])$
+A:addcol(f(1,0),f(0,1));
+A.matrix([x],[y]);
+f(x,y);
+rank(A);
+\end{lstlisting}
+\section{Núcleo, imagen y fórmula de las dimensiones}
+El núcleo es $\ker f=\{u\in V:f(u)=0\}$ y la imagen es $\operatorname{Im} f=\{f(u):u\in V\}$. Ambos son subespacios vectoriales. Para hallar el núcleo resolvemos el sistema homogéneo; para hallar la imagen extraemos una base de las imágenes de los vectores de una base del dominio.
+\[\boxed{\dim V=\dim\ker f+\dim\operatorname{Im} f.}\]
+\textbf{Ejemplo.} $g:\mathbb R^3\to\mathbb R^2$, $(x,y,z)\mapsto(x+y,y+z)$. El núcleo es el subespacio generado por $\begin{pmatrix}-1\\1\\-1\end{pmatrix}$ y la imagen es $\mathbb R^2$. Se verifica $3=1+2$. Para la aplicación anterior se verifica $2=0+2$; su imagen tiene ecuación $w=u+v$ en las coordenadas $(u,v,w)$ del destino.
+\begin{lstlisting}
+G:matrix([1,1,0],[0,1,1])$
+linsolve([x+y=0,y+z=0],[x,y,z]);
+nullspace(G); columnspace(G);
+rank(G); nullity(G);
+rank(G)+nullity(G);
+rank(A)+nullity(A);
+\end{lstlisting}
+\section{Imagen y antiimagen de un subespacio}
+Si $U$ es un subespacio de $V$, su imagen $f(U)$ es el subespacio generado por las imágenes de los vectores de una base de $U$. Si $W_0$ es un subespacio de $W$, su antiimagen es $f^{-1}(W_0)=\{u:f(u)\in W_0\}$. Esta notación no presupone que exista una aplicación inversa.
+
+\textbf{Ejemplo.} Para $g$ del apartado anterior, tomamos $U:\ x-z=0$. Una base viene dada por $\begin{pmatrix}1\\0\\1\end{pmatrix}$ y $\begin{pmatrix}0\\1\\0\end{pmatrix}$. Sus imágenes coinciden: $\begin{pmatrix}1\\1\end{pmatrix}$. Por tanto $g(U)$ tiene ecuación $u-v=0$. Para hallar la antiimagen de la recta $W_0:\ u+v=0$, sustituimos las componentes de $g$ y obtenemos $x+2y+z=0$.
+\[\dim f(U)=\dim U-\dim(U\cap\ker f).\]
+Además, $\dim f^{-1}(W_0)=\dim\ker f+\dim(W_0\cap\operatorname{Im}f)$, aplicando la fórmula de las dimensiones a la restricción correspondiente.
+\begin{lstlisting}
+U:matrix([1,0],[0,1],[1,0])$
+GU:G.U;
+columnspace(GU); rank(GU);
+expr:matrix([1,1]).G;
+linsolve([x+2*y+z=0],[x,y,z]);
+nullspace(expr);
+\end{lstlisting}
+\section{Inyectividad, sobreyectividad e isomorfismos}
+Sea $f:\mathbb R^n\to\mathbb R^m$ con matriz $A$. Es inyectiva si $\ker f=\{0\}$, equivalentemente $\operatorname{rg}A=n$. Es sobreyectiva si $\operatorname{Im}f=\mathbb R^m$, equivalentemente $\operatorname{rg}A=m$. Un isomorfismo es una aplicación lineal biyectiva. Si $m=n$, las tres propiedades son equivalentes.
+
+La aplicación $f$ del primer apartado es inyectiva y no sobreyectiva; $g$ es sobreyectiva y no inyectiva. La aplicación $h:\mathbb R^2\to\mathbb R^2$, $(x,y)\mapsto(2x+y,x+y)$ es un isomorfismo. La aplicación $k:\mathbb R^3\to\mathbb R^3$, $(x,y,z)\mapsto(x+y,y+z,x+2y+z)$ no es inyectiva ni sobreyectiva.
+\begin{lstlisting}
+H:matrix([2,1],[1,1])$
+K:matrix([1,1,0],[0,1,1],[1,2,1])$
+for J in [A,G,H,K] do print(matrix_size(J),rank(J),nullity(J))$
+\end{lstlisting}
+\section{Aplicación inversa}
+Si $f$ es un isomorfismo, existe una única aplicación lineal inversa $f^{-1}$ tal que ambas composiciones son las identidades. Su matriz en las bases intercambiadas es $A^{-1}$.
+
+Para $h$ anterior, resolvemos $2x+y=u$, $x+y=v$. Se obtiene $h^{-1}(u,v)=(u-v,2v-u)$. Comprueba las dos composiciones, tanto en forma funcional como matricial.
+\begin{lstlisting}
+linsolve([2*x+y=u,x+y=v],[x,y]);
+Hi:invert(H);
+Hi.H; H.Hi;
+Hi.matrix([u],[v]);
+\end{lstlisting}
+\section{Cambio de bases en una aplicación lineal}
+Sean $P$ y $Q$ las matrices cuyas columnas son los vectores de las nuevas bases de origen y destino, expresados en las bases antiguas. Si $A$ es la matriz antigua, entonces
+\[\boxed{M_{\mathcal D\leftarrow\mathcal B}(f)=Q^{-1}AP.}\]
+En efecto, $[u]_{\rm antigua}=P[u]_{\mathcal B}$ y $[f(u)]_{\rm antigua}=Q[f(u)]_{\mathcal D}$. Sustituyendo se deduce la fórmula. Obsérvese que $P$ y $Q$ pueden tener órdenes distintos.
+
+\textbf{Ejemplo.} Para $f:\mathbb R^2\to\mathbb R^3$ del primer apartado elegimos
+\[P=\begin{pmatrix}1&1\\0&1\end{pmatrix},\qquad Q=\begin{pmatrix}1&0&1\\0&1&0\\0&0&1\end{pmatrix}.\]
+Calculamos la matriz nueva y verificamos la igualdad $QM=AP$. Las columnas de $M$ deben ser las coordenadas de las imágenes de la nueva base de origen en la nueva base de destino.
+\begin{lstlisting}
+P:matrix([1,1],[0,1])$
+Q:matrix([1,0,1],[0,1,0],[0,0,1])$
+M:invert(Q).A.P;
+Q.M-A.P;
+c:matrix([2],[-1])$
+Q.M.c; A.P.c;
+\end{lstlisting}
+\section{Matrices equivalentes y semejantes}
+Dos matrices $A,B$ del mismo tamaño son equivalentes si existen matrices invertibles $P,Q$ tales que $B=Q^{-1}AP$. Representan una misma aplicación lineal con elecciones independientes de bases (o aplicaciones identificadas mediante isomorfismos). Son equivalentes si y solo si tienen igual rango: por operaciones elementales de filas y columnas ambas se reducen a la forma normal con un bloque identidad de orden $r$ y ceros en el resto.
+
+Dos matrices cuadradas son semejantes si existe $P$ invertible tal que $B=P^{-1}AP$. Representan un mismo endomorfismo con un cambio simultáneo de base en origen y destino. La semejanza implica equivalencia, pero no recíprocamente. Por ejemplo $I_2$ y $2I_2$ son equivalentes, pero no semejantes: toda matriz semejante a $I_2$ es $I_2$.
+
+\textbf{Ejemplo.} Cambiamos la base del endomorfismo $h$ usando $P$ del apartado anterior. Verificamos la semejanza y la invariancia del rango.
+\begin{lstlisting}
+Hs:invert(P).H.P;
+P.Hs-H.P;
+rank(H); rank(Hs);
+I:ident(2)$
+rank(I); rank(2*I);
+invert(P).I.P;
+\end{lstlisting}
+\section{Interpretación del teorema de Rouché--Frobenius}
+El sistema $AX=b$ equivale a buscar la antiimagen de un vector $b$ por la aplicación lineal asociada a $A$. Es compatible si y solo si $b\in\operatorname{Im}f$, es decir,
+\[\boxed{\operatorname{rg}A=\operatorname{rg}[A\mid b].}\]
+Si $u_0$ es una solución particular, todas las soluciones son $u_0+\ker f$. El conjunto de soluciones es un subespacio afín, no necesariamente vectorial. Si hay $n$ incógnitas y el rango común es $r$, su dimensión afín es $n-r$. Si $r=n$ la solución es única; si $r<n$ hay infinitas soluciones.
+
+\textbf{Ejemplo.} Con $A$ del primer apartado, $b=(3,1,4)$ pertenece a la imagen y tiene una única antiimagen; $b=(3,1,5)$ no pertenece a ella. Con $G$ del segundo apartado, $b=(3,1)$ tiene infinitas antiimágenes. No confundas la antiimagen de un vector con la de un subespacio.
+\begin{lstlisting}
+b1:matrix([3],[1],[4])$
+b2:matrix([3],[1],[5])$
+rank(A); rank(addcol(A,b1)); rank(addcol(A,b2));
+linsolve([x+y=3,x-y=1,2*x=4],[x,y]);
+b3:matrix([3],[1])$
+rank(G); rank(addcol(G,b3));
+linsolve([x+y=3,y+z=1],[x,y,z]);
+G.matrix([3],[0],[1]);
+\end{lstlisting}
+\section{Ejercicios de trabajo individual}\begin{enumerate}
+\item Sea $f:\mathbb R^2\to\mathbb R^3$, $(x,y)\mapsto(2x-y,x+y,3x)$. Obtén la matriz, núcleo, imagen (base y ecuación implícita) y clasifica la aplicación.
+\item Sea $g:\mathbb R^3\to\mathbb R^2$, $(x,y,z)\mapsto(x-z,y+z)$. Calcula $g(U)$ para $U:\ x+y=0$ y $g^{-1}(W)$ para $W:\ u-v=0$.
+\item Determina para qué valores de $a$ es isomorfismo $h_a:\mathbb R^2\to\mathbb R^2$, $(x,y)\mapsto(x+ay,ax+y)$. Halla la inversa cuando exista.
+\item Para $k:\mathbb R^3\to\mathbb R^3$, $(x,y,z)\mapsto(x+y,y+z,z)$, utiliza la base cuyas columnas son las de $Q$ del ejemplo. Calcula la matriz asociada y la aplicación inversa.
+\item Para $f$ del ejercicio 1, usa las bases dadas por $P,Q$ del ejemplo. Calcula la matriz asociada y verifica que es equivalente a la canónica.
+\item Estudia la compatibilidad del sistema $x+y=2$, $y+z=1$, $x+2y+z=b$ según $b$. Interpreta geométricamente el conjunto de soluciones.
+\end{enumerate}
+\section{Cuestiones de comprensión}
+\begin{enumerate}
+\item ¿Puede ser sobreyectiva una aplicación lineal de $\mathbb R^2$ en $\mathbb R^3$? ¿E inyectiva una de $\mathbb R^3$ en $\mathbb R^2$?
+\item ¿Por qué la antiimagen de un subespacio es un subespacio aunque la aplicación no sea invertible?
+\item ¿Son necesariamente semejantes dos matrices cuadradas equivalentes?
+\item ¿Cuándo es vectorial el conjunto no vacío de soluciones de $AX=b$?
+\end{enumerate}
+\end{document}

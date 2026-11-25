@@ -1,0 +1,238 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+
+/* [wxMaxima: title start ]
+Práctica II. Derivadas, diferenciabilidad y gradiente
+   [wxMaxima: title end   ] */
+
+/* [wxMaxima: comment start ]
+UPCT | Cálculo diferencial
+Nombre y apellidos: ____________________
+Ejecutar con Mayús+Intro. Justificar las conclusiones.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(all)$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Derivadas según un vector
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Sea f:UsubsetR^2→R, con U abierto, P=(a,b) y w=(u,v)≠0. Definimos
+D_wf(P)=lim_t→0(f(P+tw)-f(P))/(t).
+No es necesario que w sea unitario. Para c≠0, si existe la derivada, D_cwf(P)=cD_wf(P) (cambio de parámetro). Esto no implica aditividad respecto del vector.
+Ejemplo guiado Sea f(x,y)=x^2+xy+2y^2, P=(1,2) y w=(3,4).
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+f(x,y):=x^2+x*y+2*y^2$
+q:expand((f(1+3*t,2+4*t)-f(1,2))/t)$
+limit(ratsimp(q),t,0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+El resultado es 48: las parciales en P son 4 y 9. Repetir con -w y 2w.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Derivadas según una dirección
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Llamaremos derivada según una dirección orientada a la derivada según el vector unitario e=w/‖w‖. En particular,
+D_ef(P)=(D_wf(P))/(‖w‖).
+La normalización permite medir la variación por unidad de distancia recorrida. En el ejemplo anterior ‖w‖=5.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+norma:sqrt(3^2+4^2)$
+limit(ratsimp((f(1+3*t/norma,2+4*t/norma)-f(1,2))/t),t,0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Resultado: 48/5. Comparar con la dirección opuesta. Para una dirección de ángulo θ, usar e=(cosθ,sinθ).
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Derivadas parciales
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Son las derivadas según los vectores de la base canónica:
+f_x(a,b)=D_(1,0)f(a,b),;  f_y(a,b)=D_(0,1)f(a,b).
+Se pueden calcular por definición o mediante derivación simbólica, manteniendo fija la otra variable.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+limit(ratsimp((f(1+t,2)-f(1,2))/t),t,0);
+limit(ratsimp((f(1,2+t)-f(1,2))/t),t,0);
+fx:diff(f(x,y),x);
+fy:diff(f(x,y),y);
+subst([x=1,y=2],[fx,fy]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Se obtienen 4 y 9. Actividad: comparar la derivación simbólica con los cocientes incrementales en otro punto.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Diferenciabilidad en un punto
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+La función es diferenciable en P si existe una aplicación lineal L:R^2→R tal que
+f(P+h)-f(P)=L(h)+r(h),;  lim_h→0(r(h))/(‖h‖)=0.
+Necesariamente L(h)=f_x(P)h_1+f_y(P)h_2. Esta aplicación se denomina diferencial df_P. La diferenciabilidad implica continuidad y existencia de todas las derivadas según vectores, con D_wf(P)=df_P(w).
+Para nuestra función, el resto es cuadrático.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+R:expand(f(1+h,2+k)-f(1,2)-4*h-9*k);
+Rpolar:expand(subst([h=r*cos(th),k=r*sin(th)],R));
+limit(ratsimp(Rpolar/r),r,0,plus);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Como |h^2+hk+2k^2|≤(5/2)(h^2+k^2), el cociente del resto por la norma tiende uniformemente a cero. Un límite polar para cada ángulo fijo no bastaría por sí solo.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Condición suficiente de diferenciabilidad
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Si las derivadas parciales existen en un entorno abierto de P y son continuas en P, entonces f es diferenciable en P. Es una condición suficiente, no necesaria. El polinomio anterior cumple el criterio.
+Contraejemplo Definimos g(0,0)=0 y, fuera del origen,
+g(x,y)=(x^3)/(x^2+y^2).
+Es continua porque |g(x,y)|≤ |x|. Todas las derivadas según vectores existen, pero no forman una aplicación lineal.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+g(x,y):=x^3/(x^2+y^2)$
+limit(ratsimp(g(t,0)/t),t,0);
+limit(ratsimp(g(0,t)/t),t,0);
+limit(ratsimp(g(t,t)/t),t,0);
+limit(ratsimp((g(t,t)-t)/(sqrt(2)*abs(t))),t,0,plus);
+gx:ratsimp(diff(g(x,y),x));
+limit(subst(x=0,gx),y,0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Las parciales son 1,0; la derivada según (1,1) es 1/2, no 1. El cociente del resto por la norma sobre t>0 vale -1/(2sqrt2). Además, g_x(0,y)=0 para y≠0, así que g_x no es continua en el origen. En los comandos, g representa solo la fórmula fuera del origen.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Gradiente, diferencial e interpretación geométrica
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Si f es diferenciable, su gradiente es ∇ f(P)=(f_x(P),f_y(P)) y
+df_P(h)=∇ f(P)· h,;  D_ef(P)=∇ f(P)· e.
+Para ‖e‖=1, el máximo es ‖∇ f(P)‖, alcanzado en la dirección del gradiente si no es nulo; el mínimo es su opuesto. El gradiente es perpendicular a la curva de nivel regular. El plano tangente a la gráfica es z=f(P)+df_P(x-a,y-b).
+En el ejemplo f(1,2)=11, ∇ f(1,2)=(4,9).
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+grad:[4,9]$
+modulo:sqrt(4^2+9^2);
+emax:grad/modulo;
+plano:11+4*(x-1)+9*(y-2);
+wxplot3d([f(x,y),plano],[x,0,2],[y,1,3])$
+wxplot2d(4*cos(th)+9*sin(th),[th,0,2*%pi])$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+El máximo es sqrt97 y el mínimo -sqrt97. Una dirección tangente a la curva de nivel es (-9,4)/sqrt97, con derivada cero.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Trabajo individual
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+1. f=x^2+3xy-y^2, P=(1,-1), w=(2,-1). Calcular parciales, derivada según el vector y según su dirección, gradiente y diferencial.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+f1(x,y):=x^2+3*x*y-y^2$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Añadir celdas de cálculo y escribir aquí la justificación.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: comment start ]
+2. f=e^xy, P=(1,0), w=(1,2). Justificar diferenciabilidad y hallar el plano tangente.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+f2(x,y):=exp(x*y)$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Añadir celdas de cálculo y escribir aquí la justificación.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: comment start ]
+3. f(0,0)=0, f(x,y)=xy/(x^2+y^2) fuera del origen. Calcular las parciales y estudiar continuidad y diferenciabilidad.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+f3(x,y):=x*y/(x^2+y^2)$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Añadir celdas de cálculo y escribir aquí la justificación.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: comment start ]
+4. f(0,0)=0, f(x,y)=x^2y/(x^2+y^2) fuera del origen. Estudiar todas las derivadas según vectores y la diferenciabilidad.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+f4(x,y):=x^2*y/(x^2+y^2)$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Añadir celdas de cálculo y escribir aquí la justificación.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: comment start ]
+5. f(0,0)=0, f(x,y)=x^2sin(1/x) si x≠0 y 0 si x=0. Probar diferenciabilidad en el origen pese a la discontinuidad de f_x.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+f5(x,y):=x^2*sin(1/x)$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Añadir celdas de cálculo y escribir aquí la justificación.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: comment start ]
+6. f=x^2+4y^2, P=(2,1). Hallar las direcciones de máximo, mínimo y variación nula; representar la gráfica y su plano tangente.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+f6(x,y):=x^2+4*y^2$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Añadir celdas de cálculo y escribir aquí la justificación.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Cuestiones de comprensión
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+1. ¿Qué cambia al normalizar un vector?
+2. ¿Existencia de parciales o de todas las derivadas implica diferenciabilidad?
+3. ¿Por qué la continuidad de parciales no es necesaria?
+4. Relacionar gradiente, curva de nivel y plano tangente.
+Guardar el cuaderno ejecutado con nombre y apellidos.
+   [wxMaxima: comment end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

@@ -1,0 +1,108 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage{amsmath,amssymb,geometry,fancyhdr,xcolor,listings,tikz,array}
+\geometry{margin=2.4cm,headheight=16pt}
+\pagestyle{fancy}\fancyhf{}\lhead{UPCT}\rhead{Cálculo diferencial}\lfoot{Prácticas de wxMaxima}\rfoot{\thepage}
+\definecolor{azul}{RGB}{23,65,105}
+\lstset{basicstyle=\ttfamily\small,backgroundcolor=\color{black!4},frame=single,rulecolor=\color{black!15},breaklines=true,columns=fullflexible}
+
+\begin{document}
+\begin{center}{\large Práctica de laboratorio II}\\[5pt]{\LARGE\bfseries\color{azul} Derivadas, diferenciabilidad y gradiente}\end{center}
+\noindent Nombre y apellidos: \hrulefill\par\medskip
+\noindent\textbf{Objetivos.} Distinguir derivadas según vectores y direcciones, calcular parciales, comprobar diferenciabilidad y comprender la diferencial y el gradiente. Ejecutar las celdas con Mayús+Intro. Justificar cada conclusión matemáticamente.
+\begin{lstlisting}
+kill(all)$
+\end{lstlisting}
+\section{Derivadas según un vector}
+Sea $f:U\subset\mathbb R^2\to\mathbb R$, con $U$ abierto, $P=(a,b)$ y $w=(u,v)\ne0$. Definimos
+\[D_wf(P)=\lim_{t\to0}\frac{f(P+tw)-f(P)}{t}.\]
+No es necesario que $w$ sea unitario. Para $c\ne0$, si existe la derivada, $D_{cw}f(P)=cD_wf(P)$ (cambio de parámetro). Esto no implica aditividad respecto del vector.
+\subsection*{Ejemplo guiado} Sea $f(x,y)=x^2+xy+2y^2$, $P=(1,2)$ y $w=(3,4)$.
+\begin{lstlisting}
+f(x,y):=x^2+x*y+2*y^2$
+q:expand((f(1+3*t,2+4*t)-f(1,2))/t)$
+limit(ratsimp(q),t,0);
+\end{lstlisting}
+El resultado es $\boxed{48}$: las parciales en $P$ son $4$ y $9$. Repetir con $-w$ y $2w$.
+\section{Derivadas según una dirección}
+Llamaremos derivada según una dirección orientada a la derivada según el vector unitario $e=w/\|w\|$. En particular,
+\[\boxed{D_ef(P)=\frac{D_wf(P)}{\|w\|}}.\]
+La normalización permite medir la variación por unidad de distancia recorrida. En el ejemplo anterior $\|w\|=5$.
+\begin{lstlisting}
+norma:sqrt(3^2+4^2)$
+limit(ratsimp((f(1+3*t/norma,2+4*t/norma)-f(1,2))/t),t,0);
+\end{lstlisting}
+Resultado: $48/5$. Comparar con la dirección opuesta. Para una dirección de ángulo $\theta$, usar $e=(\cos\theta,\sin\theta)$.
+\section{Derivadas parciales}
+Son las derivadas según los vectores de la base canónica:
+\[f_x(a,b)=D_{(1,0)}f(a,b),\qquad f_y(a,b)=D_{(0,1)}f(a,b).\]
+Se pueden calcular por definición o mediante derivación simbólica, manteniendo fija la otra variable.
+\begin{lstlisting}
+limit(ratsimp((f(1+t,2)-f(1,2))/t),t,0);
+limit(ratsimp((f(1,2+t)-f(1,2))/t),t,0);
+fx:diff(f(x,y),x);
+fy:diff(f(x,y),y);
+subst([x=1,y=2],[fx,fy]);
+\end{lstlisting}
+Se obtienen $4$ y $9$. Actividad: comparar la derivación simbólica con los cocientes incrementales en otro punto.
+\section{Diferenciabilidad en un punto}
+La función es diferenciable en $P$ si existe una aplicación lineal $L:\mathbb R^2\to\mathbb R$ tal que
+\[f(P+h)-f(P)=L(h)+r(h),\qquad \lim_{h\to0}\frac{r(h)}{\|h\|}=0.\]
+Necesariamente $L(h)=f_x(P)h_1+f_y(P)h_2$. Esta aplicación se denomina diferencial $df_P$. La diferenciabilidad implica continuidad y existencia de todas las derivadas según vectores, con $D_wf(P)=df_P(w)$.
+Para nuestra función, el resto es cuadrático.
+\begin{lstlisting}
+R:expand(f(1+h,2+k)-f(1,2)-4*h-9*k);
+Rpolar:expand(subst([h=r*cos(th),k=r*sin(th)],R));
+limit(ratsimp(Rpolar/r),r,0,plus);
+\end{lstlisting}
+Como $|h^2+hk+2k^2|\le(5/2)(h^2+k^2)$, el cociente del resto por la norma tiende uniformemente a cero. Un límite polar para cada ángulo fijo no bastaría por sí solo.
+\section{Condición suficiente de diferenciabilidad}
+Si las derivadas parciales existen en un entorno abierto de $P$ y son continuas en $P$, entonces $f$ es diferenciable en $P$. Es una condición suficiente, no necesaria. El polinomio anterior cumple el criterio.
+\subsection*{Contraejemplo} Definimos $g(0,0)=0$ y, fuera del origen,
+\[g(x,y)=\frac{x^3}{x^2+y^2}.\]
+Es continua porque $|g(x,y)|\le |x|$. Todas las derivadas según vectores existen, pero no forman una aplicación lineal.
+\begin{lstlisting}
+g(x,y):=x^3/(x^2+y^2)$
+limit(ratsimp(g(t,0)/t),t,0);
+limit(ratsimp(g(0,t)/t),t,0);
+limit(ratsimp(g(t,t)/t),t,0);
+limit(ratsimp((g(t,t)-t)/(sqrt(2)*abs(t))),t,0,plus);
+gx:ratsimp(diff(g(x,y),x));
+limit(subst(x=0,gx),y,0);
+\end{lstlisting}
+Las parciales son $1,0$; la derivada según $(1,1)$ es $1/2$, no $1$. El cociente del resto por la norma sobre $t>0$ vale $-1/(2\sqrt2)$. Además, $g_x(0,y)=0$ para $y\ne0$, así que $g_x$ no es continua en el origen. En los comandos, $g$ representa solo la fórmula fuera del origen.
+\section{Gradiente, diferencial e interpretación geométrica}
+Si $f$ es diferenciable, su gradiente es $\nabla f(P)=(f_x(P),f_y(P))$ y
+\[\boxed{df_P(h)=\nabla f(P)\cdot h,\quad D_ef(P)=\nabla f(P)\cdot e}.\]
+Para $\|e\|=1$, el máximo es $\|\nabla f(P)\|$, alcanzado en la dirección del gradiente si no es nulo; el mínimo es su opuesto. El gradiente es perpendicular a la curva de nivel regular. El plano tangente a la gráfica es $z=f(P)+df_P(x-a,y-b)$.
+En el ejemplo $f(1,2)=11$, $\nabla f(1,2)=(4,9)$.
+\begin{lstlisting}
+grad:[4,9]$
+modulo:sqrt(4^2+9^2);
+emax:grad/modulo;
+plano:11+4*(x-1)+9*(y-2);
+wxplot3d([f(x,y),plano],[x,0,2],[y,1,3])$
+wxplot2d(4*cos(th)+9*sin(th),[th,0,2*%pi])$
+\end{lstlisting}
+El máximo es $\sqrt{97}$ y el mínimo $-\sqrt{97}$. Una dirección tangente a la curva de nivel es $(-9,4)/\sqrt{97}$, con derivada cero.
+\section{Trabajo individual}
+En cada ejercicio, utilizar wxMaxima para verificar los cálculos y escribir una justificación independiente cuando se estudie diferenciabilidad.
+\begin{enumerate}
+\item $f=x^2+3xy-y^2$, $P=(1,-1)$, $w=(2,-1)$. Calcular parciales, derivada según el vector y según su dirección, gradiente y diferencial.
+\item $f=e^{xy}$, $P=(1,0)$, $w=(1,2)$. Justificar diferenciabilidad y hallar el plano tangente.
+\item $f(0,0)=0$, $f(x,y)=xy/(x^2+y^2)$ fuera del origen. Calcular las parciales y estudiar continuidad y diferenciabilidad.
+\item $f(0,0)=0$, $f(x,y)=x^2y/(x^2+y^2)$ fuera del origen. Estudiar todas las derivadas según vectores y la diferenciabilidad.
+\item $f(0,0)=0$, $f(x,y)=x^2\sin(1/x)$ si $x\ne0$ y $0$ si $x=0$. Probar diferenciabilidad en el origen pese a la discontinuidad de $f_x$.
+\item $f=x^2+4y^2$, $P=(2,1)$. Hallar las direcciones de máximo, mínimo y variación nula; representar la gráfica y su plano tangente.
+\end{enumerate}
+\section{Cuestiones de comprensión}
+\begin{enumerate}
+\item ¿Qué cambia al multiplicar un vector por un escalar negativo? ¿Y al normalizarlo?
+\item ¿La existencia de parciales implica continuidad? ¿La existencia de todas las derivadas según vectores implica diferenciabilidad?
+\item ¿Por qué la continuidad de las parciales es suficiente pero no necesaria?
+\item ¿Qué relación existe entre gradiente, curva de nivel y plano tangente?
+\end{enumerate}
+\noindent\textbf{Entrega.} Guardar el cuaderno ejecutado con nombre y apellidos, incluyendo las conclusiones.
+\end{document}

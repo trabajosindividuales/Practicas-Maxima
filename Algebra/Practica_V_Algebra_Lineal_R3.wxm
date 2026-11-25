@@ -1,0 +1,298 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+
+/* [wxMaxima: title start ]
+Práctica V. Álgebra lineal: espacios vectoriales
+   [wxMaxima: title end   ] */
+
+/* [wxMaxima: comment start ]
+UPCT | GITS. Álgebra Lineal y Métodos Numéricos. Ejecutar con Mayús+Intro. Todos los ejemplos y ejercicios se realizan en R^3. Vectores por columnas. Justificar cada resultado.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Comandos de Maxima para álgebra lineal
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+columnspace(A) y nullspace(A) devuelven span con los vectores de una base. span() representa el subespacio nulo. rowop y columnop restan a la fila o columna i la j multiplicada por k.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(all)$
+load("linearalgebra")$
+A:matrix([1,0,1],[0,1,1],[1,1,2])$
+rank(A); echelon(A); triangularize(A);
+columnspace(A); nullspace(A); nullity(A);
+matrix_size(A); linalg_rank(A);
+row(A,1); col(A,2);
+rowop(A,3,1,1); rowswap(A,1,2);
+columnop(A,3,1,1); columnswap(A,1,2);
+addcol(A,matrix([0],[0],[1]));
+addrow(A,[1,0,0]);
+E:[x+y=2,x-y=0,z-x=1]$
+coefmatrix(E,[x,y,z]); augcoefmatrix(E,[x,y,z]);
+linsolve(E,[x,y,z]);
+ident(3); invert(matrix([1,2,0],[1,3,0],[1,0,1]));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Independencia, dependencia y sistemas generadores
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+El rango de la matriz de columnas es el número de vectores independientes. LI si rango = número de columnas; generador de R^n si rango = n.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(all)$
+load("linearalgebra")$
+A:matrix([1,0,1],[0,1,1],[1,1,2])$
+rank(A); echelon(A);
+load("linearalgebra")$
+columnspace(A); nullspace(A);
+A.matrix([1],[1],[-1]);
+B:matrix([1,0],[0,1],[1,1])$
+rank(B);
+C:matrix([1,0,0],[0,1,0],[1,1,1])$
+rank(C);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+La tercera columna es la suma de las dos primeras. B tiene rango 2 y C rango 3.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Bases y coordenadas
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Las coordenadas se obtienen resolviendo PB.c=u. Comprobar la reconstrucción.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+PB:matrix([1,2,0],[1,3,0],[1,0,1])$
+u:matrix([1],[-3],[2])$
+rank(PB);
+c:invert(PB).u;
+PB.c;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Las coordenadas por columna son matrix([9],[-4],[-7]). Verificar la reconstrucción.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Cambio de base
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+M transforma coordenadas de B a C. Sus columnas son los vectores de B expresados en C.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+PC:matrix([1,1,0],[0,1,0],[0,1,1])$
+M:invert(PC).PB;
+N:invert(PB).PC;
+M.N; N.M;
+d:M.c;
+PC.d;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+M=matrix([0,-1,0],[1,3,0],[0,-3,1]). Las coordenadas en C son matrix([4],[-3],[5]).
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Subespacios: ecuaciones paramétricas e implícitas
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Una descripción implícita es A.X=0; una paramétrica es X=B.t. Comprobar A.B=0 y la dimensión.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+B:matrix([1,0],[0,1],[1,1])$
+/* Eliminar s,t: x=s, y=t, z=s+t. */
+linsolve([a+c,b+c],[a,b,c]);
+nullspace(transpose(B));
+A:matrix([1,1,-1])$
+A.B;
+linsolve([x+y-z],[x,y,z]);
+3-rank(A); nullspace(A); nullity(A);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+La ecuación implícita es x+y-z=0. Las soluciones son (s,t,s+t). La dimensión es 2.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Suma, intersección y fórmula de las dimensiones
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+La suma se genera reuniendo las bases; la intersección se obtiene reuniendo las ecuaciones implícitas. Verificar la fórmula de dimensiones.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+BU:matrix([1,0],[0,1],[1,1])$
+BW:matrix([1,0],[0,1],[2,0])$
+AS:addcol(BU,BW)$
+AI:addrow(matrix([1,1,-1]),[2,0,-1])$
+linsolve([x+y-z,2*x-z],[x,y,z]);
+columnspace(AS); nullspace(AI);
+I:matrix([1],[1],[2])$
+AI.I;
+[rank(BU),rank(BW),rank(AS),3-rank(AI)];
+rank(AS)=rank(BU)+rank(BW)-(3-rank(AI));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+La intersección es la recta generada por (1,1,2). La suma tiene dimensión 3: 3=2+2-1. No es directa.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Trabajo individual
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: subsection start ]
+Ejercicio 1
+   [wxMaxima: subsection end   ] */
+
+/* [wxMaxima: comment start ]
+Estudiar la familia (1,2,0),(2,1,1),(3,3,1). Hallar una relación de dependencia, una base del subespacio generado por los vectores y completarla a una base de R^3.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(all)$
+load("linearalgebra")$
+A:matrix([1,2,3],[2,1,3],[0,1,1])$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Completar los cálculos y justificar el resultado. */
+0;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsection start ]
+Ejercicio 2
+   [wxMaxima: subsection end   ] */
+
+/* [wxMaxima: comment start ]
+Determinar para qué valores reales de a los vectores (1,0,1),(0,1,1),(1,1,a) forman una base. Analizar el caso excepcional.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(all)$
+load("linearalgebra")$
+A:matrix([1,0,1],[0,1,1],[1,1,a])$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Completar los cálculos y justificar el resultado. */
+0;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsection start ]
+Ejercicio 3
+   [wxMaxima: subsection end   ] */
+
+/* [wxMaxima: comment start ]
+Para las bases B y C dadas por las columnas de PB y PC, y el vector columna u, calcular coordenadas en ambas bases y las matrices de cambio en ambos sentidos.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(all)$
+load("linearalgebra")$
+PB:matrix([1,2,0],[2,3,0],[1,0,1])$ PC:matrix([2,1,0],[1,1,0],[0,1,1])$ u:matrix([3],[-1],[2])$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Completar los cálculos y justificar el resultado. */
+0;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsection start ]
+Ejercicio 4
+   [wxMaxima: subsection end   ] */
+
+/* [wxMaxima: comment start ]
+Hallar una base y ecuaciones paramétricas de W en R^3: x+y-z=0, y+z=0. Obtener su dimensión.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(all)$
+load("linearalgebra")$
+A:matrix([1,1,-1],[0,1,1])$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Completar los cálculos y justificar el resultado. */
+0;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsection start ]
+Ejercicio 5
+   [wxMaxima: subsection end   ] */
+
+/* [wxMaxima: comment start ]
+Obtener ecuaciones implícitas del subespacio generado por las columnas de B.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(all)$
+load("linearalgebra")$
+B:matrix([1,0],[2,1],[0,1])$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Completar los cálculos y justificar el resultado. */
+0;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsection start ]
+Ejercicio 6
+   [wxMaxima: subsection end   ] */
+
+/* [wxMaxima: comment start ]
+Sean U={z=0} y W=<(1,0,1)>. Hallar suma e intersección. Decidir si la suma es directa y descomponer (2,3,4).
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(all)$
+load("linearalgebra")$
+BU:matrix([1,0],[0,1],[0,0])$ BW:matrix([1],[0],[1])$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Completar los cálculos y justificar el resultado. */
+0;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsection start ]
+Ejercicio 7
+   [wxMaxima: subsection end   ] */
+
+/* [wxMaxima: comment start ]
+En R^3, sean U=< e_1,e_2> y W=< e_2,e_3>. Hallar bases de suma e intersección y verificar la fórmula de las dimensiones. ¿Es directa?
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(all)$
+load("linearalgebra")$
+A:matrix([1,0,0],[0,1,0],[0,0,1])$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* Completar los cálculos y justificar el resultado. */
+0;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Cuestiones de comprensión
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+1. ¿Puede una familia LD generar todo el espacio? 2. ¿Por qué importa el orden de la base? 3. ¿Basta A.B=0? 4. ¿Cuándo la unión es un subespacio? 5. ¿Qué implica la suma directa?
+   [wxMaxima: comment end   ] */
+
+/* Maxima can not load this file directly when the last line ends with a comment. */
+"Created with wxMaxima"$

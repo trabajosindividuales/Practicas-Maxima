@@ -1,0 +1,133 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage{amsmath,amssymb,geometry,fancyhdr,xcolor,listings,tikz,array}
+\geometry{margin=2.4cm,headheight=16pt}
+\pagestyle{fancy}\fancyhf{}\lhead{UPCT}\rhead{Cálculo diferencial}\lfoot{Prácticas de wxMaxima}\rfoot{\thepage}
+\definecolor{azul}{RGB}{23,65,105}
+\lstset{basicstyle=\ttfamily\small,backgroundcolor=\color{black!4},frame=single,rulecolor=\color{black!15},breaklines=true,columns=fullflexible}
+\newcommand{\limdob}{\lim_{(x,y)\to(a,b)}}
+\begin{document}
+\begin{center}
+{\large Práctica de laboratorio}\\[5pt]
+{\LARGE\bfseries\color{azul} Límites direccionales y límites iterados}\\[5pt]
+{\large Dos criterios de no existencia del límite doble}
+\end{center}
+\noindent Nombre y apellidos: \hrulefill\par\medskip
+\noindent\textbf{Objetivos.} Calcular límites sobre rectas y límites iterados con wxMaxima, interpretar los resultados y distinguir entre demostrar la no existencia de un límite y no disponer de información suficiente para decidir su existencia.
+
+\noindent Abrir el cuaderno adjunto y ejecutar las celdas mediante Mayús+Intro. El símbolo \texttt{;} muestra el resultado y \texttt{\$} lo oculta. La orden \texttt{ratsimp} simplifica expresiones racionales.
+\begin{lstlisting}
+kill(all)$
+\end{lstlisting}
+\section{Límites direccionales}
+Sea $f:D\subseteq\mathbb R^2\to\mathbb R$. Para estudiar $\limdob f(x,y)$, consideramos rectas admisibles que pasan por $(a,b)$, parametrizadas mediante $(x,y)=(a+ut,b+vt)$, con $(u,v)\ne(0,0)$.
+\[
+L_{(u,v)}=\lim_{t\to0}f(a+ut,b+vt).
+\]
+Si el límite doble existe, todos los límites sobre rectas admisibles existen y coinciden con él. En consecuencia,
+\[\boxed{L_{\mathbf v_1}\ne L_{\mathbf v_2}\ \Longrightarrow\ \text{no existe el límite doble}.}\]
+En esta práctica las funciones están definidas en un entorno perforado del punto. Para las rectas no verticales utilizamos $x=a+t$, $y=b+mt$; la vertical se estudia por separado.
+\subsection*{Ejemplo guiado}
+Sea $f(x,y)=xy/(x^2+y^2)$. Estudiamos el origen.
+\begin{lstlisting}
+f(x,y):=x*y/(x^2+y^2)$
+limit(f(t,0),t,0);
+limit(f(t,t),t,0);
+limit(ratsimp(f(t,m*t)),t,0);
+limit(f(0,t),t,0);
+limit(f(t,-t),t,0);
+\end{lstlisting}
+Para $t\ne0$, $f(t,mt)=m/(1+m^2)$. Por tanto,
+\[\boxed{L(m)=\frac{m}{1+m^2},\quad L(0)=0,\quad L(1)=\tfrac12,\quad L(-1)=-\tfrac12.}\]
+El límite doble no existe. La recta vertical proporciona cero.
+\begin{center}
+\begin{tikzpicture}[scale=1.15]
+\draw[step=.5,gray!20] (-2,-1.5) grid (2,1.5);
+\draw[->] (-2.2,0)--(2.3,0) node[right]{$x$};
+\draw[->] (0,-1.6)--(0,1.7) node[above]{$y$};
+\draw[blue,thick] (-1.4,-1.4)--(1.4,1.4) node[right]{$y=x$};
+\draw[red!75!black,thick] (-1.4,1.4)--(1.4,-1.4) node[right]{$y=-x$};
+\draw[green!50!black,thick] (-2,0)--(2,0) node[above]{$y=0$};
+\fill (0,0) circle (2pt);
+\end{tikzpicture}
+\end{center}
+\textbf{Actividad.} Determinar para qué pendientes el límite direccional es cero y explicar por qué la pendiente no representa la recta vertical.
+\section{Límites iterados}
+Se definen, cuando existen los límites correspondientes,
+\[L_1=\lim_{x\to a}\left(\lim_{y\to b}f(x,y)\right),\qquad L_2=\lim_{y\to b}\left(\lim_{x\to a}f(x,y)\right).\]
+Si el límite doble existe y existen los límites interiores en los entornos perforados correspondientes, ambos iterados coinciden con el límite doble. En efecto, la estimación $|f(x,y)-L|<\varepsilon$ en un entorno perforado se transmite al límite interior (con desigualdad no estricta), y después al exterior.
+\[\boxed{L_1\ne L_2\ \Longrightarrow\ \text{no existe el límite doble}.}\]
+\subsection*{Ejemplo guiado}
+Sea $g(x,y)=(x^2-y^2)/(x^2+y^2)$.
+\begin{lstlisting}
+g(x,y):=(x^2-y^2)/(x^2+y^2)$
+A:limit(g(x,y),y,0);
+L1:limit(A,x,0);
+B:limit(g(x,y),x,0);
+L2:limit(B,y,0);
+limit(g(t,0),t,0);
+limit(g(0,t),t,0);
+\end{lstlisting}
+Para $x\ne0$, el primer límite interior vale $1$; para $y\ne0$, el segundo vale $-1$. Así, $\boxed{L_1=1,\ L_2=-1}$ y el límite doble no existe.
+\section{Limitaciones de los dos criterios}
+La igualdad de los iterados no garantiza la existencia del límite. Para la función $f$ del apartado 1, ambos iterados valen cero.
+\begin{lstlisting}
+limit(limit(f(x,y),y,0),x,0);
+limit(limit(f(x,y),x,0),y,0);
+\end{lstlisting}
+Tampoco basta que coincidan todos los límites direccionales. Consideramos
+\[h(x,y)=\frac{x^2y}{x^4+y^2}.\]
+\begin{lstlisting}
+h(x,y):=x^2*y/(x^4+y^2)$
+limit(ratsimp(h(t,m*t)),t,0);
+limit(h(t,0),t,0);
+limit(h(0,t),t,0);
+limit(limit(h(x,y),y,0),x,0);
+limit(limit(h(x,y),x,0),y,0);
+limit(ratsimp(h(t,t^2)),t,0);
+\end{lstlisting}
+Para $m\ne0$, $h(t,mt)=mt/(t^2+m^2)\to0$. Los ejes también proporcionan cero, al igual que los iterados. Si Maxima pregunta si $m$ es cero, responder negativamente en el cálculo genérico y comprobar $m=0$ aparte.
+Sin embargo, $h(t,t^2)=1/2$ para $t\ne0$. Por tanto, el límite doble no existe.
+\begin{center}
+\begin{tikzpicture}[scale=1.35]
+\draw[step=.5,gray!20] (-1.5,-.5) grid (1.5,2);
+\draw[->] (-1.7,0)--(1.8,0) node[right]{$x$};
+\draw[->] (0,-.65)--(0,2.1) node[above]{$y$};
+\draw[gray,dashed] (-.5,-.5)--(1.5,1.5);
+\draw[gray,dashed] (-1.5,1.5)--(.5,-.5);
+\draw[red!75!black,thick,domain=-1.4:1.4,samples=80] plot (\x,{\x*\x}) node[right]{$y=x^2$};
+\fill (0,0) circle (2pt);
+\end{tikzpicture}
+\end{center}
+\section{Visualización gráfica}
+\begin{lstlisting}
+wxplot3d(f(x,y),[x,-1,1],[y,-1,1],[grid,60,60]);
+wxplot3d(h(x,y),[x,-1,1],[y,-1,1],[grid,60,60]);
+\end{lstlisting}
+Comparar las superficies próximas al origen. La representación gráfica orienta la búsqueda de trayectorias, pero no constituye una demostración; el muestreo puede ocultar comportamientos singulares.
+\section{Trabajo individual}
+Para cada función, calcular ambos iterados, estudiar las rectas de pendiente $m$ y la vertical y justificar la conclusión. Si ambos criterios son inconcluyentes, buscar otra trayectoria o una estimación que permita demostrar la existencia.
+\renewcommand{\arraystretch}{2.5}
+\begin{center}
+\begin{tabular}{c>{$\displaystyle}c<{$}c}\hline
+Ejercicio&\text{Función}&Punto\\\hline
+1&\frac{x^2}{x^2+y^2}&$(0,0)$\\
+2&\frac{xy}{x^2+2y^2}&$(0,0)$\\
+3&\frac{(x-1)(y+2)}{(x-1)^2+(y+2)^2}&$(1,-2)$\\
+4&\frac{x^3y}{x^6+y^2}&$(0,0)$\\
+5&\frac{x^2y}{x^2+y^2}&$(0,0)$\\
+6&\frac{x^2-y^4}{x^2+y^4}&$(0,0)$\\\hline
+\end{tabular}
+\end{center}
+\noindent\textbf{Indicaciones.} En el ejercicio 3, trasladar el origen. En el 4, estudiar $y=x^3$. En el 5, utilizar $|F_5(x,y)|\le |y|$. En el 6, comparar los ejes y la recta $y=x$.
+\section{Cuestiones de comprensión}
+\begin{enumerate}
+\item ¿Es suficiente que coincidan los límites iterados para que exista el límite doble?
+\item ¿Es suficiente que coincidan todos los límites direccionales?
+\item ¿Qué diferencia hay entre una dirección y una trayectoria curvilínea?
+\item ¿Qué relación hay entre la continuidad en un punto y la existencia del límite?
+\end{enumerate}
+\noindent\textbf{Entrega.} Guardar el cuaderno ejecutado con nombre y apellidos, incluyendo los cálculos y una conclusión matemática razonada para cada ejercicio.
+\end{document}
